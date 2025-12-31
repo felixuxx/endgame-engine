@@ -1,0 +1,25 @@
+# Zig build artifacts
+zig-cache/
+zig-out/
+zig-out-debug/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Debug files
+debug-env.sh
