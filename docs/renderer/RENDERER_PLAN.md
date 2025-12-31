@@ -3,7 +3,9 @@
 **Zig + Vulkan Renderer Architecture Plan**
 Version 1.0
 
-This document describes the full rendering architecture for your game engine: data layout, Vulkan subsystems, resource management, GPU-driven workflows, frame graph design, and integration with ECS.
+This document describes the full rendering architecture for your game engine:
+data layout, Vulkan subsystems, resource management, GPU-driven workflows,
+frame graph design, and integration with ECS.
 
 ---
 
@@ -309,4 +311,6 @@ GraphicsPass → vkCmdDrawIndirect
 
 ## 15. Final Notes
 
-This plan represents **the full evolution path** of your engine’s renderer, from simple forward rendering to a fully GPU-driven architecture. The early stages prioritize usability; later stages introduce significant performance scaling.
+This plan represents **the full evolution path** of your engine’s renderer,
+from simple forward rendering to a fully GPU-driven architecture. The early
+stages prioritize usability; later stages introduce significant performance scaling.

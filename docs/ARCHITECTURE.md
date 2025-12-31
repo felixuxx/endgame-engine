@@ -29,16 +29,20 @@
 ## 1. High-level goals
 
 * **ECS-first**: archetype-based ECS optimized for fast iteration and cache locality.
-* **Modular & pluginable**: core stays minimal; features are plugins (physics, audio, ui).
+* **Modular & pluginable**: core stays minimal; features are plugins (physics,
+audio, ui).
 * **Explicit Vulkan renderer**: render graph driven, triple-buffered frames-in-flight.
-* **Lua scripting**: sandboxed high-level logic, game scripts run via registered Lua systems.
-* **Zig-first ergonomics**: use `comptime` for component registration, safe explicit memory rules, small runtime.
+* **Lua scripting**: sandboxed high-level logic, game scripts run via registered
+Lua systems.
+* **Zig-first ergonomics**: use `comptime` for component registration, safe
+explicit memory rules, small runtime.
 
 ---
 
 ## 2. Mapping repo folders → responsibilities
 
-* `src/app` — App bootstrap, `App` struct, plugin registry, stage runner, command queue.
+* `src/app` — App bootstrap, `App` struct, plugin registry, stage runner, command
+queue.
 * `src/core` — ECS: World, Entity, Component registry, Archetypes, Queries, Schedulers.
 * `src/renderer` — Vulkan integration, render graph, pipelines, GPU resource manager.
 * `src/asset` — Asset server, loaders, handle semantics, hot-reload integration.
@@ -61,7 +65,8 @@
 
 * `App` owns `World`, `Resources`, `Scheduler`, `PluginRegistry`, and `RenderContext`.
 * Default stage list:
-  `Startup -> PreUpdate -> Update -> PostUpdate -> PreRender -> Render -> PostRender -> Cleanup`
+  `Startup -> PreUpdate -> Update -> PostUpdate -> PreRender -> Render
+-> PostRender -> Cleanup`
 * Systems register with stage plus metadata (reads/writes, labels, before/after).
 
 ### Frame loop (high-level)
@@ -129,9 +134,12 @@ pub fn registerComponent(comptime T: type) ComponentId { ... }
 
 ### Integration pattern
 
-* Single Lua state per App or a pool for worker threads; prefer single main-state to avoid concurrency issues.
-* Expose small, explicit API to Lua: `spawn_entity()`, `add_component(entity, component)`, `query(...)`, `time.delta`.
-* Lua scripts register named functions (e.g., `function update(dt)`), which get registered as engine systems with declared resource/component access metadata.
+* Single Lua state per App or a pool for worker threads; prefer single
+main-state to avoid concurrency issues.
+* Expose small, explicit API to Lua: `spawn_entity()`, `add_component(entity,
+component)`, `query(...)`, `time.delta`.
+* Lua scripts register named functions (e.g., `function update(dt)`), which get
+registered as engine systems with declared resource/component access metadata.
 
 ### Binding approach
 
@@ -176,7 +184,8 @@ pub fn registerComponent(comptime T: type) ComponentId { ... }
 
 * `AssetServer` returns `Handle<T>` immediately for `load(path)`.
 * Background loader threads decode files and insert into `Assets<T>` store.
-* Hot-reload: use `inotify` / `ReadDirectoryChangesW` to detect changes; mark asset dirty and requeue loader.
+* Hot-reload: use `inotify` / `ReadDirectoryChangesW` to detect changes;
+mark asset dirty and requeue loader.
 * Asset lifetime via strong/weak handle refcounts; evict unused assets.
 
 Supported loaders: GLTF, KTX2/DDS, PNG/JPEG, shader sources, custom scene format.
@@ -186,14 +195,16 @@ Supported loaders: GLTF, KTX2/DDS, PNG/JPEG, shader sources, custom scene format
 ## 9. Physics & Audio (plugins)
 
 * Physics plugin offers `RigidBody`, `Collider`, and `PhysicsStep` fixed-step system.
-* Use an external solver (Rapier) wrapped by plugin, or implement a minimal custom solver for predictable control.
+* Use an external solver (Rapier) wrapped by plugin, or implement a minimal
+custom solver for predictable control.
 * Audio plugin runs mixer on separate thread, offers 3D positional audio components.
 
 ---
 
 ## 10. Memory & allocators
 
-* Global allocator for long-lived objects (e.g., `std.heap.page_allocator` or custom buddy).
+* Global allocator for long-lived objects (e.g., `std.heap.page_allocator`
+or custom buddy).
 * Frame arena allocator for transient per-frame data; reset each frame.
 * Vulkan memory separate, managed through `GpuAllocator` with deferred free.
 
@@ -205,7 +216,8 @@ Supported loaders: GLTF, KTX2/DDS, PNG/JPEG, shader sources, custom scene format
 
   * `--release`, `--debug`, `--validate-vulkan` (enable validation layers)
 * Include feature flags toggles (e.g., `enable_tracy`, `enable_luajit`).
-* Setup targets for examples and test harnesses; expose `run-example <name>` in build script.
+* Setup targets for examples and test harnesses; expose `run-example <name>`
+in build script.
 
 ---
 
@@ -213,13 +225,15 @@ Supported loaders: GLTF, KTX2/DDS, PNG/JPEG, shader sources, custom scene format
 
 * `tests/ecs` — unit tests for spawn/despawn, queries, change detection.
 * `tests/scheduler` — determinism and conflict resolution tests.
-* `examples/basic_triangle`, `examples/pong`, `examples/scene_instancing` — minimal runnable examples.
+* `examples/basic_triangle`, `examples/pong`, `examples/scene_instancing`
+— minimal runnable examples.
 
 ---
 
 ## 13. Tooling
 
-* `tools/shader_compiler` — pack shaders, compile to SPIR-V, optionally reflect descriptor sets.
+* `tools/shader_compiler` — pack shaders, compile to SPIR-V, optionally reflect
+descriptor sets.
 * `tools/asset_packer` — bake textures/meshes for faster load time.
 * Dev helper: `tools/reload_watcher` — run with engine to auto-reload changed assets.
 
@@ -254,7 +268,8 @@ Supported loaders: GLTF, KTX2/DDS, PNG/JPEG, shader sources, custom scene format
 
 * Keep core minimal; prefer plugins for domain-specific features.
 * All new systems must include tests (unit or integration).
-* Use `comptime` for component type registration; avoid runtime reflection in hot paths.
+* Use `comptime` for component type registration; avoid runtime reflection in
+hot paths.
 * Document ABI exposed to Lua in `src/scripting/README.md`.
 
 ---
@@ -291,8 +306,10 @@ export fn lua_spawn_entity(L: *lua.State) c_int {
 ## 17. Next steps / recommended immediate tasks
 
 1. Implement `core.world` and `components` with basic spawn/query/despawn test coverage.
-2. Create a minimal `renderer.vk_init` that creates a window, swapchain and renders a colored triangle.
-3. Add `scripting.lua_vm` wrapper and expose simple `spawn_entity`/`add_component` demo.
+2. Create a minimal `renderer.vk_init` that creates a window, swapchain and
+renders a colored triangle.
+3. Add `scripting.lua_vm` wrapper and expose simple `spawn_entity`/`add_component`
+demo.
 4. Wire `build.zig` targets for `examples/basic_triangle` and tests run.
 
 ---
@@ -308,8 +325,12 @@ export fn lua_spawn_entity(L: *lua.State) c_int {
 
 If you'd like, I can:
 
-* produce a `docs/ecs.md` that expands the archetype & query internals into exact Zig data structures, with runnable unit tests, **or**
-* generate a sample `examples/basic_triangle` complete Zig program that wires `main.zig -> renderer.vk_init -> render loop` so you can get Vulkan + Zig running immediately, **or**
-* produce an `API.md` describing the Lua bindings you should expose and a script example.
+* produce a `docs/ecs.md` that expands the archetype & query internals into
+exact Zig data structures, with runnable unit tests, **or**
+* generate a sample `examples/basic_triangle` complete Zig program that wires
+`main.zig -> renderer.vk_init -> render loop` so you can get
+Vulkan + Zig running immediately, **or**
+* produce an `API.md` describing the Lua bindings you should expose and a
+script example.
 
 Which of those should I generate next?

@@ -3,7 +3,10 @@
 **Render Graph — Design & API**
 Version 1.0
 
-This document defines the Render Graph subsystem: a flexible, explicit way to express render passes, resource dependencies, automatic synchronization and lifetime, and multi-pass scheduling. It focuses on integration with the existing Vulkan backend (`RENDER_BACKEND.md`) and the engine's ECS.
+This document defines the Render Graph subsystem: a flexible, explicit way to
+express render passes, resource dependencies, automatic synchronization and
+lifetime, and multi-pass scheduling. It focuses on integration with the existing
+Vulkan backend (`RENDER_BACKEND.md`) and the engine's ECS.
 
 ---
 
@@ -48,15 +51,20 @@ Node {
 }
 ```
 
-Nodes declare attachments they will read/write. The graph resolves dependencies to create execution order.
+Nodes declare attachments they will read/write. The graph resolves dependencies
+to create execution order.
 
 ### 2.3 Edge
 
-Edges are implicit via resources — if Node A writes resource R and Node B reads R, an edge A -> B exists. Edges may carry explicit layout requirements or access flags.
+Edges are implicit via resources — if Node A writes resource R and Node B reads
+R, an edge A -> B exists. Edges may carry explicit layout requirements or access
+flags.
 
 ### 2.4 Render Graph Instance
 
-A `RenderGraph` object is built out of `Node` definitions and `Resource` descriptions. Each frame you `build()` it (resolve resource aliases, transient allocation) and `execute()` it (record command buffers and submit).
+A `RenderGraph` object is built out of `Node` definitions and `Resource`
+descriptions. Each frame you `build()` it (resolve resource aliases, transient
+allocation) and `execute()` it (record command buffers and submit).
 
 ---
 
@@ -112,7 +120,8 @@ render_graph.addNode(node);
 * **Persistent**: lives across frames (shadow maps, G-buffer if reused)
 * **Transient**: allocated for this frame only (postprocess temporaries)
 
-Transient images are ideal for intermediate passes and will be allocated from a pool and freed/reused across frames.
+Transient images are ideal for intermediate passes and will be allocated from a
+pool and freed/reused across frames.
 
 ---
 
@@ -126,9 +135,11 @@ When `build()` is called:
 4. Merge compatible passes into command buffer groups for fewer submissions.
 5. Allocate transient resources using the `TransientResourcePool`.
 6. Emit required image/buffer transitions and barrier info per edge.
-7. Produce a `BuiltGraph` structure optimized for execution (precomputed command buffer templates, descriptor set updates).
+7. Produce a `BuiltGraph` structure optimized for execution (precomputed command
+buffer templates, descriptor set updates).
 
-Important: `build()` must be efficient; cache the `BuiltGraph` when node set is unchanged between frames.
+Important: `build()` must be efficient; cache the `BuiltGraph` when node set is
+unchanged between frames.
 
 ---
 
@@ -150,7 +161,9 @@ Nodes get a `RenderContext` with handy helpers:
 * `draw_indexed` / `dispatch` / `copy_buffer_to_image`
 * `set_viewport` / `set_scissor`
 
-The `BuiltGraph` contains precomputed barrier ranges so the execute step doesn't need to recompute. However Vulkan commands still require explicit barriers; `execute()` emits them in the recorded command buffer.
+The `BuiltGraph` contains precomputed barrier ranges so the execute step doesn't
+need to recompute. However Vulkan commands still require explicit barriers;
+`execute()` emits them in the recorded command buffer.
 
 ---
 
@@ -173,7 +186,8 @@ Group barriers where possible to reduce calls.
 
 ## 8. Transient Resource Pool
 
-Implement allocator that reuses images/buffers with the same descriptors to avoid continuous allocation.
+Implement allocator that reuses images/buffers with the same descriptors to
+avoid continuous allocation.
 
 API:
 
@@ -189,7 +203,9 @@ Pool tracks last-used frame; reuse based on compatible formats / extents.
 
 ## 9. Descriptor Management
 
-Since nodes may require descriptor sets for materials / frame data, `build()` should pre-allocate descriptor sets for nodes or generate descriptor update templates where supported.
+Since nodes may require descriptor sets for materials / frame data, `build()`
+should pre-allocate descriptor sets for nodes or generate descriptor update
+templates where supported.
 
 Strategy:
 
@@ -206,7 +222,8 @@ When nodes target different queues (compute vs graphics), schedule accordingly:
 * Build cross-queue dependencies (release/acquire semaphores)
 * Allow compute nodes to run in parallel with graphics when dependencies allow
 
-Topological sorting should consider queue hints; group nodes by (queue family) and detect synchronization points.
+Topological sorting should consider queue hints; group nodes by (queue family)
+and detect synchronization points.
 
 ---
 
@@ -249,11 +266,13 @@ try built.execute(&vk_ctx);
 
 ## 13. Integration with ECS
 
-* Visibility culling system writes instance lists (SSBOs) consumed by render graph compute/graphics nodes.
+* Visibility culling system writes instance lists (SSBOs) consumed by render
+graph compute/graphics nodes.
 * Camera system selects active camera & writes per-frame UBO.
 * Material / Mesh components register resources referenced in the graph.
 
-Design principle: renderer pulls what it needs from ECS in an `extract()` stage and writes GPU-friendly structures into a `RenderWorld` used by the render graph.
+Design principle: renderer pulls what it needs from ECS in an `extract()` stage
+and writes GPU-friendly structures into a `RenderWorld` used by the render graph.
 
 ---
 
@@ -267,7 +286,8 @@ Design principle: renderer pulls what it needs from ECS in an `extract()` stage 
 ## 15. Tests
 
 * Unit test topological sorting & dependency detection.
-* Integration test that builds & executes a simple graph: depth prepass + forward pass.
+* Integration test that builds & executes a simple graph:
+depth prepass + forward pass.
 * Stress test with many transient attachments to validate pool reuse.
 
 ---
@@ -275,7 +295,8 @@ Design principle: renderer pulls what it needs from ECS in an `extract()` stage 
 ## 16. Future Extensions
 
 * Automatic render pass merging / pass fusion to reduce render pass counts.
-* Descriptor update templates + push descriptor support for platforms that support them.
+* Descriptor update templates + push descriptor support for platforms that
+support them.
 * Graph-level reflection to auto-generate ImGui debug UI.
 * GPU-driven render graph where execution and culling decisions are made on GPU.
 
