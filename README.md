@@ -16,11 +16,11 @@ safe explicit memory rules, and a small runtime.
 
 ## Documentation
 
-- [Architecture Overview](ARCHITECTURE.md)
-- [ECS Specification](ECS.md)
-- [Renderer Plan](renderer/RENDERER_PLAN.md)
-- [Render Backend](renderer/RENDER_BACKEND.md)
-- [Render Graph](renderer/RENDER_GRAPH.md)
+- [Architecture Overview](docs/ARCHITECTURE.md)
+- [ECS Specification](docs/ECS.md)
+- [Renderer Plan](docs/renderer/RENDERER_PLAN.md)
+- [Render Backend](docs/renderer/RENDER_BACKEND.md)
+- [Render Graph](docs/renderer/RENDER_GRAPH.md)
 
 ## Getting Started
 
